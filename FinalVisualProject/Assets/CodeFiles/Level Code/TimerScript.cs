@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
@@ -8,30 +8,33 @@ using UnityEngine.SceneManagement;
 
 public class TimerScript : MonoBehaviour
 {
-   
+
     public static Stopwatch stopwatch = new Stopwatch();
-    [SerializeField] public  Text TimeTextField;
-    [SerializeField] public  Text GameWonOrNotTextField;
+    [SerializeField] public Text TimeTextField;
+    [SerializeField] public Text GameWonOrNotTextField;
     [SerializeField] public Text LevelName;
     [SerializeField] public Text LivesLeft;
     static bool gameOver;
     //public static TimerScript random = new TimerScript();
-    
-    
+
+
     public static long currentime;
-    public  GameObject RightWall;
-    public  GameObject LeftWall;
-    public  GameObject TimeWall;
-     public long gameovertime;
-     public string LowerLevel;
+    public GameObject RightWall;
+    public GameObject LeftWall;
+    public GameObject TimeWall;
+    public long gameovertime;
+    public string LowerLevel;
     public string NextLevel;
     public static bool WatterbottleTouches;
     public static bool SceneComplete;
     public static string CurrentScene;
     public static int lives = 3;
-    // Start is called before the first frame update
-    void Start()
+    public static int NumberOfTotalAttempts = 0;
+    public static double GreenWallDelay = (100 - NumberOfTotalAttempts) / 100;
+    // Start is called before the first frame update on every scene
+    void Start() 
     {
+        NumberOfTotalAttempts= PlayerPrefs.GetInt("Attempts"); //Sets the count of the number of atttempts at the start of each scene from the PLayerPrefs File
         CurrentScene = SceneManager.GetActiveScene().name;
         LevelName.text = CurrentScene;
         SceneComplete = false;
@@ -46,13 +49,15 @@ public class TimerScript : MonoBehaviour
         {
             TimeTextField.text = "";
             GameWonOrNotTextField.text = "YOU LOST";
-        } else {
+        }
+        else
+        {
             DisplayTime();
             SceneChangeToLowerLevel();
             SceneChangeToHigherLevel();
             DisplayLives();
         }
-        
+
     }
 
     void DisplayTime()
@@ -70,7 +75,7 @@ public class TimerScript : MonoBehaviour
 
     void SceneChangeToLowerLevel()
     {
-        if (currentime>gameovertime)
+        if (currentime > gameovertime)
         {
             stopwatch.Stop();
             stopwatch.Reset();
@@ -94,8 +99,12 @@ public class TimerScript : MonoBehaviour
                 TimeTextField.text = "";
                 GameWonOrNotTextField.text = "YOU WON";
                 SceneComplete = false;
-            } else {
-               // SceneComplete = false; 
+                NumberOfTotalAttempts = NumberOfTotalAttempts + 1;
+                UpdateGamePlayCount();
+            }
+            else
+            {
+                // SceneComplete = false; 
                 SceneManager.LoadScene(NextLevel);
             }
         }
@@ -114,7 +123,7 @@ public class TimerScript : MonoBehaviour
         RightWall.GetComponent<Renderer>().material.color = Color.yellow;
         LeftWall.GetComponent<Renderer>().material.color = Color.yellow;
         TimeWall.GetComponent<Renderer>().material.color = Color.yellow;
-        Invoke("TurnRoomGreen", 1);
+        Invoke("TurnRoomGreen", (float)GreenWallDelay);// Add the Delay Here
     }
     void TurnRoomGreen()
     {
@@ -132,12 +141,15 @@ public class TimerScript : MonoBehaviour
             gameOver = true;
 
         }
+        NumberOfTotalAttempts = NumberOfTotalAttempts + 1;
+        UpdateGamePlayCount();
+
 
     }
 
     public void DisplayLives()
     {
-        LivesLeft.text = "Lives Left: " +  lives;
+        LivesLeft.text = "Lives Left: " + lives;
     }
     public void isSceneComplete()
     {
@@ -146,6 +158,14 @@ public class TimerScript : MonoBehaviour
             SceneComplete = true;
         }
     }
+    void OnApplicationQuit()
+    {
+        UnityEngine.Debug.Log("User Played " + NumberOfTotalAttempts + " attempts");
+        UpdateGamePlayCount();
+    }
 
+    public static void UpdateGamePlayCount()
+    {
+        PlayerPrefs.SetInt("Attempts", NumberOfTotalAttempts);
+    }
 }
-
