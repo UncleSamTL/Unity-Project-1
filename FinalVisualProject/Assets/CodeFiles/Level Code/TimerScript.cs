@@ -29,12 +29,13 @@ public class TimerScript : MonoBehaviour
     public static bool SceneComplete;
     public static string CurrentScene;
     public static int lives = 3;
-    public static int NumberOfTotalAttempts = 0;
+    public static int NumberOfTotalAttempts = 77;
     public static double GreenWallDelay = (100 - NumberOfTotalAttempts) / 100;
     // Start is called before the first frame update on every scene
     void Start() 
     {
         NumberOfTotalAttempts= PlayerPrefs.GetInt("Attempts"); //Sets the count of the number of atttempts at the start of each scene from the PLayerPrefs File
+        //NumberOfTotalAttempts = 0;
         CurrentScene = SceneManager.GetActiveScene().name;
         LevelName.text = CurrentScene;
         SceneComplete = false;
@@ -139,10 +140,10 @@ public class TimerScript : MonoBehaviour
         if (lives == 0)
         {
             gameOver = true;
+            NumberOfTotalAttempts = NumberOfTotalAttempts + 1;
+            UpdateGamePlayCount();
 
         }
-        NumberOfTotalAttempts = NumberOfTotalAttempts + 1;
-        UpdateGamePlayCount();
 
 
     }
